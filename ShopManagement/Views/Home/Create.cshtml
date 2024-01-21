@@ -1,0 +1,45 @@
+﻿@model ServiceManagement.Models.Announcement
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Dodaj Ogłoszenie</h1>
+
+<h4>Ogłoszenie</h4>
+<hr />
+<div id="back">
+    <div id="view">
+        <div class="row">
+            <div class="col-md-4">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="Title" class="control-label">Tytuł:</label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Description" class="control-label">Opis pliku:</label>
+                        <textarea type="text" asp-for="Description" class="form-control"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Time" class="control-label">Wybierz ile dni ma być widoczne ogłoszenie:</label>
+                        <input asp-for="Time" class="form-control" />
+                        <span asp-validation-for="Time" class="text-danger"></span>
+                    </div>
+                    <br />
+                    <div class="form-group">
+                        <input type="submit" value="Dodaj ogłoszenie" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+        <br />
+        <div>
+            <a asp-action="Index">Wróć</a>
+        </div>
+    </div>
+</div>
+

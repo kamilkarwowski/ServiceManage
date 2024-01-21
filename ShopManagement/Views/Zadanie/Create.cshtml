@@ -1,0 +1,224 @@
+﻿@model ServiceManagement.Models.Zadanie
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Dodaj zadanie</h1>
+
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+       <form method="post" asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label">Nazwa zadania:</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label">Opis zadania:</label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Created" class="control-label">Data utworzenia:</label>
+                <input asp-for="Created" class="form-control" />
+                <span asp-validation-for="Created" class="text-danger"></span>
+            </div>
+           
+            <div class="form-group">
+                <label asp-for="StatusId" class="control-label">Priorytet zadania:</label>
+                <select asp-for="StatusId" class ="form-control" asp-items="ViewBag.Statuses"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="AreaId" class="control-label">Rejon zadania</label>
+                <select asp-for="AreaId" class="form-control" asp-items="ViewBag.Areas"></select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="UserId" class="control-label">Użytkownik przydzielony:</label>
+                <select asp-for="UserId" class ="form-control" asp-items="ViewBag.Users"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Latitude"  class="control-label">Długość geograficzna:</label>
+                <input asp-for="Latitude" id="lat"  class="form-control" />
+                <span asp-validation-for="Latitude" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Longtitude"  class="control-label">Szerokość geograficzna:</label>
+                <input asp-for="Longtitude" id="lng"  class="form-control" />
+                <span asp-validation-for="Longtitude" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#cartModal" id="show-cart">
+                    Dodaj lokalizację
+                
+                </button>
+            <br></br>
+                <div class="form-group">
+                <input type="submit" value="Dodaj" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Wróć do listy</a>
+</div>
+
+
+
+<div class="modal fade" id="cartModal" tabindex="-1" role="dialog" aria-labelledby="cartModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cartModalLabel">Dodaj lokalizacje Zadania</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="map" style="height:400px; width:450px; text-align:center;">
+                   
+
+
+
+                </div>
+
+               
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    let map;
+    let marker;
+    let geocoder;
+    let responseDiv;
+    let response;
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 11,
+            center: { lat: 53.53, lng: 22.3857 },
+            mapTypeControl: false,
+        });
+        geocoder = new google.maps.Geocoder();
+
+        const inputText = document.createElement("input");
+
+        inputText.type = "text";
+        inputText.placeholder = "Enter a location";
+
+        const submitButton = document.createElement("input");
+
+        submitButton.type = "button";
+        submitButton.value = "Geocode";
+        submitButton.classList.add("button", "button-primary");
+
+        const clearButton = document.createElement("input");
+
+        clearButton.type = "button";
+        clearButton.value = "Clear";
+        clearButton.classList.add("button", "button-secondary");
+        response = document.createElement("pre");
+        response.id = "response";
+        response.innerText = "";
+        responseDiv = document.createElement("div");
+        responseDiv.id = "response-container";
+        responseDiv.appendChild(response);
+        
+
+        const instructionsElement = document.createElement("p");
+
+        instructionsElement.id = "instructions";
+        instructionsElement.innerHTML =
+            "<strong>Instructions</strong>: Enter an address in the textbox to geocode or click on the map to reverse geocode.";
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputText);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(submitButton);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(clearButton);
+        map.controls[google.maps.ControlPosition.LEFT_TOP].push(
+            instructionsElement
+        );
+        map.controls[google.maps.ControlPosition.LEFT_TOP].push(responseDiv);
+        marker = new google.maps.Marker({
+            map,
+        });
+        map.addListener("click", (e) => {
+            geocode({ location: e.latLng });
+            
+
+        });
+        submitButton.addEventListener("click", () =>
+            geocode({ address: inputText.value })
+        );
+        clearButton.addEventListener("click", () => {
+            clear();
+        });
+        clear();
+    }
+
+    function clear() {
+        marker.setMap(null);
+        document.getElementById("lat").setAttribute("value", '');
+        document.getElementById("lng").setAttribute("value", '');
+        const mapDiv = document.getElementById("map");
+        const responseDiv = document.getElementById("response-container");
+
+
+        if (responseDiv && responseDiv.parentNode) {
+            responseDiv.parentNode.removeChild(responseDiv);
+        }
+    }
+
+    function geocode(request) {
+        clear();
+        geocoder
+            .geocode(request)
+            .then((result) => {
+                const { results } = result;
+
+                map.setCenter(results[0].geometry.location);
+                marker.setPosition(results[0].geometry.location);
+                marker.setMap(map);
+                response.innerText = JSON.stringify(result, null, 2);
+                var lat = results[0].geometry.location.lat(); 
+                var lng = results[0].geometry.location.lng()
+                 
+
+                console.log(lat);
+                console.log(lng);
+                document.getElementById("lat").setAttribute("value", lat);
+                document.getElementById("lng").setAttribute("value", lng);
+                return results;
+                
+            })
+            .catch((e) => {
+                alert("Geocode was not successful for the following reason: " + e);
+            });
+
+    }
+
+
+
+
+    window.initMap = initMap;
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyCcpZRdm3_FJzr-pMLd-PavJAfRvu9pVos&libraries=places&callback=initMap&v=weekly"></script>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

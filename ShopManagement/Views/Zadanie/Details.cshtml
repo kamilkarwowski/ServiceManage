@@ -1,0 +1,128 @@
+﻿@model  ServiceManagement.Models.Zadanie
+
+
+<h1>Szczegóły zadania</h1>
+
+<div>
+    <h4>Zadanie</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Nazwa zadania:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            Opis zadania:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class="col-sm-2">
+            Data utworzenia:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Created)
+        </dd>
+        <dt class="col-sm-2">
+            Data deadline'u:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Deadline)
+        </dd>
+        <dt class="col-sm-2">
+            Rejon:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Area.Name)
+        </dd>
+        <dt class="col-sm-2">
+            Priorytet:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Status.Name)
+        </dd>
+        <dt class="col-sm-2">
+            Serwisant dla którego przydzielono zadanie:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.User.Name)
+            @Html.DisplayFor(model => model.User.LastName)
+
+        </dd>
+      <dt class="col-sm-2">
+            Lokalizacja:</dt>
+            <dd class="col-sm-2">
+            <a  id="submit" class="btn btn-primary">
+                Sprawdź na mapie
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-map" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.502.502 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8V1.91zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z" />
+                </svg>
+            </a>
+</dd>
+            <dd class="col-sm-10"><div id="map" style="height: 400px; width: 100%;"></div></dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edytuj</a> |
+    <a asp-action="Index">Wróć do listy</a>
+</div>
+
+
+
+<script>
+    let map;
+   let lat1 = parseFloat(@Html.Raw(Json.Serialize(Model.Latitude)));
+   let lng1 = parseFloat(@Html.Raw(Json.Serialize(Model.Longtitude)));
+    let geocoder;
+    const myLatLng = { lat, lng };
+
+ function initMap() {
+  const map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 8,
+            center: { lat: 53.53, lng: 22.3857 },
+  });
+  const geocoder = new google.maps.Geocoder();
+  const infowindow = new google.maps.InfoWindow();
+
+  document.getElementById("submit").addEventListener("click", () => {
+    geocodeLatLng(geocoder, map, infowindow);
+  });
+}
+
+function geocodeLatLng(geocoder, map, infowindow) {
+  
+  const latlng = {
+    lat: parseFloat(lat1),
+    lng: parseFloat(lng1),
+  };
+
+  geocoder
+    .geocode({ location: latlng })
+    .then((response) => {
+      if (response.results[0]) {
+        map.setZoom(13);
+
+        var address = response.results[0].formatted_address;
+
+
+        const marker = new google.maps.Marker({
+          position: latlng,
+          map: map,
+        });
+
+        infowindow.setContent(response.results[0].formatted_address);
+        infowindow.open(map, marker);
+      } else {
+        window.alert("No results found");
+      }
+    })
+    .catch((e) => window.alert("Geocoder failed due to: " + e));
+}
+
+window.initMap = initMap;
+</script>
+
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyCcpZRdm3_FJzr-pMLd-PavJAfRvu9pVos&libraries=places&callback=initMap&v=weekly"></script>

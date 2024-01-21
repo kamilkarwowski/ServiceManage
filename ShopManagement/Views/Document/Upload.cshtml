@@ -1,0 +1,44 @@
+﻿@model ServiceManagement.Models.Document
+
+@{
+    ViewData["Title"] = "Upload";
+}
+<div id="back">
+    <div id="view">
+        <h1>Dodaj dokument</h1>
+
+        <h4>Dodawanie dokumentu</h4>
+        <hr />
+        <div class="row">
+            <div class="col-md-4">
+                <form method="post" asp-action="Upload" enctype="multipart/form-data">
+                    
+                    <div class="form-group">
+                        <label for="description">Opis dokumentu:</label>
+                        <textarea id="description" name="description" class="form-control"></textarea>
+                    </div>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" id="isPrivate" name="isPrivate" class="form-check-input">
+                            <label for="isPrivate" class="form-check-label">Tylko dla administratorów</label>
+                        </div>
+                    }
+                    <br />
+                    <div class="form-group">
+                        <label for="file">Wybierz plik:</label>
+                        <input type="file" id="file" name="file" class="form-control-file" accept=".pdf, .xml, .doc, .jpg">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Prześlij</button>
+                </form>
+            </div>
+        </div>
+
+        <div>
+            <a asp-action="Index">Powrót</a>
+        </div>
+    </div>
+</div>
+
+
+
